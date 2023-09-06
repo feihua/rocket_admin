@@ -21,9 +21,7 @@ Authorization: Bearer {{token}}
 
 {
   "current": 1,
-  "pageSize": 10,
-  "mobile": "18613030352",
-  "status_id": 1
+  "pageSize": 10
 }
 ###新增用户 user_save
 POST {{host}}/api/user_save
@@ -31,9 +29,11 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "mobile": "18613030351",
-  "user_name": "test",
-  "remark": "test"
+  "mobile": "18613030355",
+  "user_name": "test3",
+  "sort": 1,
+  "status_id": 1,
+  "remark": "test3"
 }
 ###删除用户 user_delete
 POST {{host}}/api/user_delete

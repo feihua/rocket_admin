@@ -1,24 +1,22 @@
 #[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate rbatis;
-#[macro_use]
 extern crate rocket;
 
 use std::net::Ipv4Addr;
 
-use rbatis::rbatis::RBatis;
 use rocket::{Config, Request};
 use rocket::serde::json::serde_json::json;
 use rocket::serde::json::Value;
+use tracing_subscriber::filter;
 
 use crate::handler::{menu_handler, role_handler, user_handler};
+use crate::setup::set_up_db;
 use crate::utils::auth::Token;
 
 pub mod handler;
 pub mod model;
 pub mod vo;
 pub mod utils;
+pub mod setup;
 
 #[get("/ping")]
 fn ping(_auth: Token) -> &'static str {
@@ -41,15 +39,16 @@ fn resp() -> Value {
     json!({"code": 401,"msg": "Unauthorized","description": "The request requires user authentication"})
 }
 
-lazy_static! {
-    static ref RB: RBatis = RBatis::new();
-}
-
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
-    log4rs::init_file("src/config/log4rs.yaml", Default::default()).unwrap();
-
-    RB.init(rbdc_mysql::driver::MysqlDriver {}, "mysql://root:ad879037-c7a4-4063-9236-6bfc35d54b7d@139.159.180.129:3306/rustdb").unwrap();
+    tracing_subscriber::fmt()
+        .with_max_level(filter::LevelFilter::DEBUG)
+        .with_test_writer()
+        .init();
+    let db = match set_up_db().await {
+        Ok(db) => db,
+        Err(err) => panic!("{}", err),
+    };
 
     let config = Config {
         address: Ipv4Addr::new(0, 0, 0, 0).into(),
@@ -58,6 +57,7 @@ async fn main() -> Result<(), rocket::Error> {
     };
 
     let _rocket = rocket::build()
+        .manage(db)
         .configure(config)
         .mount("/", routes![ping])
         .mount("/api", routes![user_handler::login,

@@ -6,7 +6,7 @@ use crate::utils::jwt_util::JWTToken;
 
 #[derive(Debug, Deserialize)]
 pub struct Token {
-    pub id: i32,
+    pub id: i64,
     pub username: String,
 }
 
