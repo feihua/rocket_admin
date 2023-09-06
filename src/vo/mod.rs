@@ -1,11 +1,11 @@
 use std::fmt::Debug;
 
-use sea_orm::DbErr;
 use serde::Serialize;
 
 pub mod user_vo;
 pub mod role_vo;
 pub mod menu_vo;
+pub mod error_handler;
 
 // 统一返回vo
 #[derive(Serialize, Debug, Clone)]
@@ -17,18 +17,6 @@ pub struct BaseResponse<T>
     pub data: Option<T>,
 }
 
-// 处理统一返回
-pub fn handle_result<T>(result: Result<T, DbErr>) -> BaseResponse<String> {
-    match result {
-        Ok(_u) => {
-            ok_result()
-        }
-        Err(err) => {
-            err_result_msg(err.to_string())
-        }
-    }
-}
-
 
 pub fn ok_result() -> BaseResponse<String> {
     BaseResponse {
@@ -38,7 +26,7 @@ pub fn ok_result() -> BaseResponse<String> {
     }
 }
 
-pub fn ok_result_msg(msg: String) -> BaseResponse<String> {
+pub fn ok_result_msg(msg: &str) -> BaseResponse<String> {
     BaseResponse {
         msg: msg.to_string(),
         code: 0,
@@ -62,7 +50,7 @@ pub fn ok_result_data<T: Serialize + Debug>(data: T) -> BaseResponse<T> {
     }
 }
 
-pub fn err_result_msg(msg: String) -> BaseResponse<String> {
+pub fn err_result_msg(msg: &str) -> BaseResponse<String> {
     BaseResponse {
         msg: msg.to_string(),
         code: 1,
@@ -97,15 +85,5 @@ pub fn ok_result_page<T: Serialize + Debug>(data: T, total: u64) -> ResponsePage
         success: true,
         data: Some(data),
         total,
-    }
-}
-
-pub fn err_result_page(msg: String) -> ResponsePage<String> {
-    ResponsePage {
-        msg: msg.to_string(),
-        code: 1,
-        success: false,
-        data: Some("None".to_string()),
-        total: 0,
     }
 }

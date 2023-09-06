@@ -3,7 +3,7 @@ extern crate rocket;
 
 use std::net::Ipv4Addr;
 
-use rocket::{Config, Request};
+use rocket::{Config, Request, Response};
 use rocket::serde::json::serde_json::json;
 use rocket::serde::json::Value;
 use tracing_subscriber::filter;
@@ -38,6 +38,7 @@ fn not_permissions(req: &Request) -> Value {
 fn resp() -> Value {
     json!({"code": 401,"msg": "Unauthorized","description": "The request requires user authentication"})
 }
+
 
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {

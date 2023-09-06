@@ -2,7 +2,7 @@ use sea_orm::*;
 
 // Replace with your database URL and database name
 const DATABASE_URL: &str = "mysql://root:ad879037-c7a4-4063-9236-6bfc35d54b7d@139.159.180.129:3306/rustdb";
-const DB_NAME: &str = "rustdb";
+// const DB_NAME: &str = "rustdb";
 
 pub(super) async fn set_up_db() -> Result<DatabaseConnection, DbErr> {
     let db = Database::connect(DATABASE_URL).await?;
