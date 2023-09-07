@@ -53,7 +53,7 @@ async fn main() -> Result<(), rocket::Error> {
 
     let config = Config {
         address: Ipv4Addr::new(0, 0, 0, 0).into(),
-        port: 8099,
+        port: 8019,
         ..Config::debug_default()
     };
 

@@ -171,7 +171,7 @@ pub async fn query_user_menu(db: &State<DatabaseConnection>, auth: Token) -> Res
     }
 
     let mut sys_menu: Vec<MenuUserList> = Vec::new();
-    for y in SysMenu::find().filter(sys_menu::Column::Id.is_in(sys_menu_ids)).order_by_asc(sys_menu::Column::Sort).all(db).await? {
+    for y in SysMenu::find().filter(sys_menu::Column::Id.is_in(sys_menu_ids)).filter(sys_menu::Column::StatusId.eq(1)).order_by_asc(sys_menu::Column::Sort).all(db).await? {
         sys_menu.push(MenuUserList {
             id: y.id,
             parent_id: y.parent_id,
