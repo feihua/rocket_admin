@@ -28,7 +28,8 @@ INSERT INTO sys_menu (id, menu_name, menu_type, status_id, sort, parent_id, menu
 VALUES (2, '权限管理', 1, 1, 5, 0, '/sys', '', 'SettingOutlined', '权限管理', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO sys_menu (id, menu_name, menu_type, status_id, sort, parent_id, menu_url, api_url, menu_icon, remark,
                       create_time, update_time)
-VALUES (3, '用户管理', 2, 1, 1, 2, '/user', '', 'setting', '用户管理', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (3, '用户管理', 2, 1, 1, 2, '/user', '/api/user_list', 'setting', '用户管理', CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP);
 INSERT INTO sys_menu (id, menu_name, menu_type, status_id, sort, parent_id, menu_url, api_url, menu_icon, remark,
                       create_time, update_time)
 VALUES (4, '角色管理', 2, 1, 2, 2, '/role', '/api/role_list', '', '角色管理', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

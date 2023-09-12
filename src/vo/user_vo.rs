@@ -13,7 +13,7 @@ pub struct UserLoginReq {
 #[derive(Debug, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct QueryUserRoleReq {
-    pub user_id: i32,
+    pub user_id: i64,
 }
 
 
@@ -84,7 +84,7 @@ pub struct UserListReq {
     #[serde(rename = "pageSize")]
     pub page_size: u64,
     pub mobile: Option<String>,
-    pub status_id: Option<i8>,
+    pub status_id: Option<i32>,
 }
 
 #[derive(Debug, Serialize)]

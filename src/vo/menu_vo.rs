@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct MenuListReq {
-    pub menu_name: Option<String>,
+    pub status_id: Option<i8>,
 }
 
 
@@ -31,9 +31,9 @@ pub struct MenuSaveReq {
     pub status_id: i8,
     pub parent_id: Option<i64>,
     pub menu_name: String,
-    pub menu_url: Option<String>,
+    pub menu_url: String,
     pub icon: Option<String>,
-    pub api_url: Option<String>,
+    pub api_url: String,
     pub remark: Option<String>,
     pub menu_type: i8,
 }
@@ -44,11 +44,11 @@ pub struct MenuUpdateReq {
     pub id: i64,
     pub sort: i32,
     pub status_id: i8,
-    pub parent_id: Option<i64>,
+    pub parent_id: i64,
     pub menu_name: String,
-    pub menu_url: Option<String>,
+    pub menu_url: String,
     pub icon: Option<String>,
-    pub api_url: Option<String>,
+    pub api_url: String,
     pub remark: Option<String>,
     pub menu_type: i8,
 }

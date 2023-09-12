@@ -1,10 +1,6 @@
 # rocket-admin
 
-是基于rocket和sea orm的rbac权限管理系统
-
-# 生成entity
-
-sea-orm-cli generate entity -o src/model --with-serde both
+是基于rocket和diesel orm的rbac权限管理系统
 
 # 前端项目
 
@@ -28,10 +24,12 @@ http://139.159.180.129:81/salvo 账号：18613030352 密码：123456
 # 本地启动
 
 ```
-1.创建数据库并导入sql脚本
-2.修改setup.rs代码中的 const DATABASE_URL: &str = "mysql://root:ad879037-c7a4-4063-9236-6bfc35d54b7d@139.159.180.129:3306/rustdb"; 为你自己的数据信息
-3.启动 cargo run main.rs
-4.验证脚本在docs目录下,请求接口前要先执行登录接口(user.http文件中)
+1.cargo install diesel_cli --no-default-features --features mysql 安装diesel_cli命令行
+2.修改echo DATABASE_URL=mysql://username:password@localhost/diesel_demo > .env 为你自己的数据信息
+3.执行 diesel setup 如果diesel_demo数据库不存在,则创建
+4.执行 diesel migration run 初始化脚本数据
+5.启动 cargo run main.rs
+6.验证脚本在docs目录下,请求接口前要先执行登录接口(user.http文件中)
 
 POST {{host}}/api/login
 Content-Type: application/json

@@ -1,22 +1,26 @@
 #[macro_use]
 extern crate rocket;
 
+use std::env;
 use std::net::Ipv4Addr;
 
-use rocket::{Config, Request, Response};
+use diesel::MysqlConnection;
+use diesel::r2d2::{self, ConnectionManager};
+use dotenvy::dotenv;
+use once_cell::sync::Lazy;
+use rocket::{Config, Request};
 use rocket::serde::json::serde_json::json;
 use rocket::serde::json::Value;
 use tracing_subscriber::filter;
 
 use crate::handler::{menu_handler, role_handler, user_handler};
-use crate::setup::set_up_db;
 use crate::utils::auth::Token;
 
 pub mod handler;
 pub mod model;
 pub mod vo;
 pub mod utils;
-pub mod setup;
+pub mod schema;
 
 #[get("/ping")]
 fn ping(_auth: Token) -> &'static str {
@@ -39,17 +43,22 @@ fn resp() -> Value {
     json!({"code": 401,"msg": "Unauthorized","description": "The request requires user authentication"})
 }
 
+type DbPool = r2d2::Pool<ConnectionManager<MysqlConnection>>;
+
+pub static RB: Lazy<DbPool> = Lazy::new(|| {
+    let database_url = env::var("database_url").expect("database_url must be set");
+    let manager = ConnectionManager::<MysqlConnection>::new(database_url);
+    r2d2::Pool::builder().build(manager).expect("Failed to create pool.")
+});
 
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
+    dotenv().ok();
     tracing_subscriber::fmt()
         .with_max_level(filter::LevelFilter::DEBUG)
         .with_test_writer()
         .init();
-    let db = match set_up_db().await {
-        Ok(db) => db,
-        Err(err) => panic!("{}", err),
-    };
+
 
     let config = Config {
         address: Ipv4Addr::new(0, 0, 0, 0).into(),
@@ -58,7 +67,6 @@ async fn main() -> Result<(), rocket::Error> {
     };
 
     let _rocket = rocket::build()
-        .manage(db)
         .configure(config)
         .mount("/", routes![ping])
         .mount("/api", routes![user_handler::login,
