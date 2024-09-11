@@ -26,7 +26,7 @@ impl<'r> FromRequest<'r> for Token {
                     Ok(data) => { data }
                     Err(err) => {
                         log::error!("check token fail path: {}, token: {}, err: {}", path, token, err.to_string());
-                        return Outcome::Failure((Status::Unauthorized, ()));
+                        return Outcome::Error((Status::Unauthorized, ()));
                     }
                 };
 
@@ -41,13 +41,13 @@ impl<'r> FromRequest<'r> for Token {
                     Outcome::Success(Token { id: jwt_token.id, username: jwt_token.username })
                 } else {
                     log::error!("{} has no permissions request path: {}, token: {}", &jwt_token.username, path, token);
-                    Outcome::Failure((Status::Forbidden, ()))
+                    Outcome::Error((Status::Forbidden, ()))
                 };
             }
             log::error!("the token format wrong path: {}", path);
         }
         log::error!("Authorization miss path: {}", path);
-        Outcome::Failure((Status::Unauthorized, ()))
+        Outcome::Error((Status::Unauthorized, ()))
     }
 }
 
