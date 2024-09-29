@@ -14,13 +14,14 @@ use rocket::serde::json::Value;
 use tracing_subscriber::filter;
 
 use crate::handler::{menu_handler, role_handler, user_handler};
-use crate::utils::auth::Token;
+use crate::middleware::auth::Token;
 
 pub mod handler;
 pub mod model;
 pub mod vo;
 pub mod utils;
 pub mod schema;
+pub mod middleware;
 
 #[get("/ping")]
 fn ping(_auth: Token) -> &'static str {
