@@ -13,7 +13,7 @@ use crate::schema::sys_role::dsl::sys_role;
 use crate::schema::sys_role_menu::{menu_id, role_id};
 use crate::schema::sys_role_menu::dsl::sys_role_menu;
 use crate::schema::sys_user_role::dsl::sys_user_role;
-use crate::utils::auth::Token;
+use crate::middleware::auth::Token;
 use crate::vo::{err_result_msg, handle_result, ok_result_data, ok_result_page};
 use crate::vo::role_vo::*;
 
@@ -214,7 +214,7 @@ pub async fn update_role_menu(item: Json<UpdateRoleMenuReq>, _auth: Token) -> Va
                         })
                     }
 
-                    json!(handle_result(diesel::insert_into(sys_role_menu::table()).values(role_menu).execute(conn)))
+                    json!(handle_result(diesel::insert_into(sys_role_menu::table()).values(&role_menu).execute(conn)))
                 }
                 Err(err) => {
                     error!("err:{}", err.to_string());

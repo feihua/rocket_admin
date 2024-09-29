@@ -16,7 +16,7 @@ use crate::schema::sys_user::{id, mobile, password, status_id};
 use crate::schema::sys_user::dsl::sys_user;
 use crate::schema::sys_user_role::{role_id, user_id};
 use crate::schema::sys_user_role::dsl::sys_user_role;
-use crate::utils::auth::Token;
+use crate::middleware::auth::Token;
 use crate::utils::error::WhoUnfollowedError;
 use crate::utils::jwt_util::JWTToken;
 use crate::vo::{err_result_msg, handle_result, ok_result, ok_result_data, ok_result_page};

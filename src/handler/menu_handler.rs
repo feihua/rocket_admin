@@ -7,7 +7,7 @@ use crate::model::menu::{SysMenu, SysMenuAdd, SysMenuUpdate};
 use crate::RB;
 use crate::schema::sys_menu::{id, parent_id, sort, status_id};
 use crate::schema::sys_menu::dsl::sys_menu;
-use crate::utils::auth::Token;
+use crate::middleware::auth::Token;
 use crate::vo::{err_result_msg, handle_result, ok_result_page};
 use crate::vo::menu_vo::{*};
 
