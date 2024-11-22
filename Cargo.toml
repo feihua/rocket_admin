@@ -17,4 +17,4 @@ tracing-subscriber = "0.3.17"
 jsonwebtoken = "9.3.0"
 
 futures = { version = "0.3", default-features = false }
-thiserror = "1.0"
+thiserror = "2.0.3"
