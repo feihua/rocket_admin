@@ -7,16 +7,17 @@ use rocket::{Config, Request};
 use rocket::serde::json::serde_json::json;
 use rocket::serde::json::Value;
 use tracing_subscriber::filter;
-
-use crate::handler::{menu_handler, role_handler, user_handler};
+use handler::system::{menu_handler, role_handler, user_handler};
 use crate::setup::set_up_db;
-use crate::utils::auth::Token;
+use middleware::auth::Token;
 
 pub mod handler;
 pub mod model;
 pub mod vo;
 pub mod utils;
 pub mod setup;
+pub mod middleware;
+pub mod common;
 
 #[get("/ping")]
 fn ping(_auth: Token) -> &'static str {

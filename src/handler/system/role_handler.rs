@@ -1,15 +1,14 @@
 use rocket::serde::json::{Json, Value};
-use rocket::serde::json::serde_json::json;
 use rocket::State;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, NotSet, PaginatorTrait, QueryFilter, QueryTrait};
 use sea_orm::ActiveValue::Set;
 
 use crate::model::{sys_role, sys_role_menu, sys_user_role};
 use crate::model::prelude::{SysMenu, SysRole, SysRoleMenu, SysUserRole};
-use crate::utils::auth::Token;
-use crate::vo::{err_result_msg, ok_result_data, ok_result_msg, ok_result_page};
-use crate::vo::error_handler::ErrorResponder;
-use crate::vo::role_vo::*;
+use crate::middleware::auth::Token;
+use crate::common::error_handler::ErrorResponder;
+use crate::common::result::BaseResponse;
+use crate::vo::system::role_vo::*;
 
 // 查询角色列表
 #[post("/role_list", data = "<item>")]
@@ -28,10 +27,10 @@ pub async fn role_list(db: &State<DatabaseConnection>, item: Json<RoleListReq>, 
     let total = paginator.num_items().await.unwrap_or_default();
 
 
-    let mut role_list: Vec<RoleListData> = Vec::new();
+    let mut role_list_all: Vec<RoleListData> = Vec::new();
 
     for role in paginator.fetch_page(item.page_no.clone() - 1).await? {
-        role_list.push(RoleListData {
+        role_list_all.push(RoleListData {
             id: role.id,
             sort: role.sort,
             status_id: role.status_id,
@@ -42,7 +41,7 @@ pub async fn role_list(db: &State<DatabaseConnection>, item: Json<RoleListReq>, 
         })
     }
 
-    Ok(json!(ok_result_page(role_list, total)))
+    Ok(BaseResponse::<Vec<RoleListData>>::ok_result_page(role_list_all, total))
 }
 
 // 添加角色信息
@@ -63,7 +62,7 @@ pub async fn role_save(db: &State<DatabaseConnection>, item: Json<RoleSaveReq>, 
     };
 
     SysRole::insert(sys_role).exec(db).await?;
-    Ok(json!(ok_result_msg("添加角色成功!")))
+    Ok(BaseResponse::<String>::ok_result_msg("添加角色成功!".to_string()))
 }
 
 // 更新角色信息
@@ -75,7 +74,7 @@ pub async fn role_update(db: &State<DatabaseConnection>, item: Json<RoleUpdateRe
     let role = item.0;
 
     if SysRole::find_by_id(role.id.clone()).one(db).await?.is_none() {
-        return Ok(json!(err_result_msg("角色不存在,不能更新!")));
+        return Ok(BaseResponse::<String>::err_result_msg("角色不存在,不能更新!".to_string()));
     }
     let sys_role = sys_role::ActiveModel {
         id: Set(role.id),
@@ -87,7 +86,7 @@ pub async fn role_update(db: &State<DatabaseConnection>, item: Json<RoleUpdateRe
     };
 
     SysRole::update(sys_role).exec(db).await?;
-    Ok(json!(ok_result_msg("更新角色成功!")))
+    Ok(BaseResponse::<String>::ok_result_msg("更新角色成功!".to_string()))
 }
 
 // 删除角色信息
@@ -99,11 +98,11 @@ pub async fn role_delete(db: &State<DatabaseConnection>, item: Json<RoleDeleteRe
     let ids = item.ids.clone();
 
     if SysUserRole::find().filter(sys_user_role::Column::RoleId.is_in(ids)).count(db).await? > 0 {
-        return Ok(json!(err_result_msg("角色已被使用,不能直接删除！")));
+        return Ok(BaseResponse::<String>::err_result_msg("角色已被使用,不能直接删除！".to_string()));
     }
 
     SysRole::delete_many().filter(sys_role::Column::Id.is_in(item.ids.clone())).exec(db).await?;
-    Ok(json!(ok_result_msg("删除角色信息成功!")))
+    Ok(BaseResponse::<String>::ok_result_msg("删除角色信息成功!".to_string()))
 }
 
 // 查询角色关联的菜单
@@ -135,7 +134,10 @@ pub async fn query_role_menu(db: &State<DatabaseConnection>, item: Json<QueryRol
         }
     }
 
-    Ok(json!(ok_result_data(QueryRoleMenuData {role_menus: role_menu_ids,menu_list: menu_data_list})))
+    Ok(BaseResponse::<QueryRoleMenuData>::ok_result_data(QueryRoleMenuData {
+        role_menus: role_menu_ids,
+        menu_list: menu_data_list,
+    }))
 }
 
 // 更新角色关联的菜单
@@ -160,5 +162,6 @@ pub async fn update_role_menu(db: &State<DatabaseConnection>, item: Json<UpdateR
         })
     }
     SysRoleMenu::insert_many(menu_role).exec(db).await?;
-    Ok(json!(ok_result_msg("更新角色关联的菜单!")))
+
+    Ok(BaseResponse::<String>::ok_result_msg("更新角色关联的菜单!".to_string()))
 }

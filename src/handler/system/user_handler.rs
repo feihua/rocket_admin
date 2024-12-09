@@ -1,17 +1,15 @@
-use rocket::serde::json::{Json, Value};
-use rocket::serde::json::serde_json::json;
+use rocket::serde::json::{serde_json, Json, Value};
 use rocket::State;
 use sea_orm::{ActiveModelTrait, ColumnTrait, ConnectionTrait, DatabaseBackend, DatabaseConnection, EntityTrait, NotSet, PaginatorTrait, QueryFilter, QueryOrder, QueryTrait, Statement};
 use sea_orm::ActiveValue::Set;
-
+use crate::common::error::WhoUnfollowedError;
 use crate::model::{sys_menu, sys_user, sys_user_role};
 use crate::model::prelude::{SysMenu, SysRole, SysUser, SysUserRole};
-use crate::utils::auth::Token;
-use crate::utils::error::WhoUnfollowedError;
+use crate::middleware::auth::Token;
 use crate::utils::jwt_util::JWTToken;
-use crate::vo::{err_result_msg, ok_result_data, ok_result_msg, ok_result_page};
-use crate::vo::error_handler::ErrorResponder;
-use crate::vo::user_vo::*;
+use crate::common::error_handler::ErrorResponder;
+use crate::common::result::BaseResponse;
+use crate::vo::system::user_vo::*;
 
 // 后台用户登录
 #[post("/login", data = "<item>")]
@@ -24,7 +22,7 @@ pub async fn login(db: &State<DatabaseConnection>, item: Json<UserLoginReq>) -> 
     log::info!("select_by_mobile: {:?}",user_result);
 
     if user_result.is_none() {
-        return Ok(json!(err_result_msg("用户不存在!")));
+        return Ok(BaseResponse::<String>::err_result_msg("用户不存在!".to_string()));
     }
 
     let user = user_result.unwrap();
@@ -34,18 +32,18 @@ pub async fn login(db: &State<DatabaseConnection>, item: Json<UserLoginReq>) -> 
     let password = user.password;
 
     if password.ne(&item.password) {
-        return Ok(json!(err_result_msg("密码不正确!")));
+        return Ok(BaseResponse::<String>::err_result_msg("密码不正确!".to_string()));
     }
 
     let btn_menu = query_btn_menu(db, id.clone()).await?;
 
     if btn_menu.len() == 0 {
-        return Ok(json!(err_result_msg("用户没有分配角色或者菜单,不能登录!")));
+        return Ok(BaseResponse::<String>::err_result_msg("用户没有分配角色或者菜单,不能登录!".to_string()));
     }
 
     match JWTToken::new(id, &username, btn_menu).create_token("123") {
         Ok(token) => {
-            Ok(json!(ok_result_data(token)))
+            Ok(BaseResponse::<String>::ok_result_data(token))
         }
         Err(err) => {
             let er = match err {
@@ -53,7 +51,7 @@ pub async fn login(db: &State<DatabaseConnection>, item: Json<UserLoginReq>) -> 
                 _ => "no math error".to_string()
             };
 
-            Ok(json!(err_result_msg(&er)))
+            Ok(BaseResponse::<String>::err_result_msg(er))
         }
     }
 }
@@ -102,7 +100,10 @@ pub async fn query_user_role(db: &State<DatabaseConnection>, item: Json<QueryUse
         });
     }
 
-    Ok(json!(ok_result_data(QueryUserRoleData {sys_role_list,user_role_ids})))
+    Ok(BaseResponse::<QueryUserRoleData>::ok_result_data(QueryUserRoleData {
+        sys_role_list,
+        user_role_ids,
+    }))
 }
 
 // 更新用户角色信息
@@ -116,7 +117,7 @@ pub async fn update_user_role(db: &State<DatabaseConnection>, item: Json<UpdateU
     let role_ids = &user_role.role_ids;
 
     if user_id == 1 {
-        return Ok(json!(err_result_msg("不能修改超级管理员的角色!")));
+        return Ok(BaseResponse::<String>::err_result_msg("不能修改超级管理员的角色!".to_string()));
     }
 
     SysUserRole::delete_many().filter(sys_user_role::Column::UserId.eq(user_id)).exec(db).await?;
@@ -138,7 +139,7 @@ pub async fn update_user_role(db: &State<DatabaseConnection>, item: Json<UpdateU
     }
 
     SysUserRole::insert_many(sys_role_user_list).exec(db).await?;
-    Ok(json!(ok_result_msg("更新用户角色信息成功!")))
+    Ok(BaseResponse::<String>::ok_result())
 }
 
 #[get("/query_user_menu")]
@@ -147,7 +148,7 @@ pub async fn query_user_menu(db: &State<DatabaseConnection>, auth: Token) -> Res
     let db = db as &DatabaseConnection;
 
     if SysUser::find_by_id(auth.id.clone()).one(db).await?.is_none() {
-        return Ok(json!(err_result_msg("用户不存在")));
+        return Ok(BaseResponse::<String>::err_result_msg("用户不存在".to_string()));
     }
 
     let sys_menu_list: Vec<sys_menu::Model>;
@@ -185,7 +186,15 @@ pub async fn query_user_menu(db: &State<DatabaseConnection>, auth: Token) -> Res
 
     let avatar = "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png".to_string();
 
-    Ok(json!(ok_result_data(QueryUserMenuData {sys_menu,btn_menu,avatar ,name: auth.username})))
+    let resp = QueryUserMenuData {
+        sys_menu,
+        btn_menu,
+        avatar: avatar,
+        name: auth.username.clone(),
+    };
+
+    let r = serde_json::to_string(&resp).unwrap();
+    Ok(BaseResponse::<String>::ok_result_data(r))
 }
 
 // 查询用户列表
@@ -219,7 +228,7 @@ pub async fn user_list(db: &State<DatabaseConnection>, item: Json<UserListReq>, 
         })
     }
 
-    Ok(json!(ok_result_page(list_data, total)))
+    Ok(BaseResponse::<Vec<UserListData>>::ok_result_page(list_data, total))
 }
 
 // 添加用户信息
@@ -241,7 +250,7 @@ pub async fn user_save(db: &State<DatabaseConnection>, item: Json<UserSaveReq>, 
     };
 
     SysUser::insert(sys_user).exec(db).await?;
-    Ok(json!(ok_result_msg("添加用户信息成功!")))
+    Ok(BaseResponse::<String>::ok_result())
 }
 
 // 更新用户信息
@@ -253,7 +262,7 @@ pub async fn user_update(db: &State<DatabaseConnection>, item: Json<UserUpdateRe
     let db = db as &DatabaseConnection;
 
     if SysUser::find_by_id(user.id.clone()).one(db).await?.is_none() {
-        // return Ok(json!(err_result_msg("用户不存在!")));
+        // return Ok(BaseResponse::<String>::err_result_msg("用户不存在!")));
         return Err(ErrorResponder::from("用户不存在!"));
     }
 
@@ -268,7 +277,7 @@ pub async fn user_update(db: &State<DatabaseConnection>, item: Json<UserUpdateRe
     };
 
     SysUser::update(sys_user).exec(db).await?;
-    Ok(json!(ok_result_msg("更新用户信息成功!")))
+    Ok(BaseResponse::<String>::ok_result())
 }
 
 // 删除用户信息
@@ -279,12 +288,12 @@ pub async fn user_delete(db: &State<DatabaseConnection>, item: Json<UserDeleteRe
 
     let ids = item.ids.clone();
     for id in ids {
-        if id != 1 {//id为1的用户为系统预留用户,不能删除
+        if id != 1 { //id为1的用户为系统预留用户,不能删除
             let _ = SysUser::delete_by_id(id).exec(db).await;
         }
     }
 
-    Ok(json!(ok_result_msg("删除用户信息成功!")))
+    Ok(BaseResponse::<String>::ok_result())
 }
 
 // 更新用户密码
@@ -296,7 +305,7 @@ pub async fn update_user_password(db: &State<DatabaseConnection>, item: Json<Upd
 
     let result = SysUser::find_by_id(user_pwd.id).one(db).await?;
     if result.is_none() {
-        return Ok(json!(err_result_msg("用户不存在!")));
+        return Ok(BaseResponse::<String>::err_result_msg("用户不存在!".to_string()))
     };
 
     let user = result.unwrap();
@@ -305,8 +314,8 @@ pub async fn update_user_password(db: &State<DatabaseConnection>, item: Json<Upd
         s_user.password = Set(user_pwd.re_pwd);
 
         s_user.update(db).await?;
-        Ok(json!(ok_result_msg("更新用户密码成功!")))
+        Ok(BaseResponse::<String>::ok_result())
     } else {
-        Ok(json!(err_result_msg("旧密码不正确!")))
+        Ok(BaseResponse::<String>::err_result_msg("旧密码不正确!".to_string()))
     }
 }
