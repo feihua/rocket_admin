@@ -1,9 +1,9 @@
 use crate::common::error_handler::ErrorResponder;
 use crate::common::result::BaseResponse;
 use crate::middleware::auth::Token;
-use crate::model::prelude::SysMenu;
-use crate::model::sys_menu;
-use crate::model::sys_menu::ActiveModel;
+use crate::model::system::prelude::SysMenu;
+use crate::model::system::sys_menu;
+use crate::model::system::sys_menu::ActiveModel;
 use crate::vo::system::menu_vo::*;
 use rocket::serde::json::{Json, Value};
 use rocket::State;

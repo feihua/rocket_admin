@@ -3,12 +3,12 @@ use rocket::State;
 use sea_orm::{ActiveModelTrait, ColumnTrait, ConnectionTrait, DatabaseBackend, DatabaseConnection, EntityTrait, NotSet, PaginatorTrait, QueryFilter, QueryOrder, QueryTrait, Statement};
 use sea_orm::ActiveValue::Set;
 use crate::common::error::WhoUnfollowedError;
-use crate::model::{sys_menu, sys_user, sys_user_role};
-use crate::model::prelude::{SysMenu, SysRole, SysUser, SysUserRole};
+use crate::model::system::prelude::{SysMenu, SysRole, SysUser, SysUserRole};
 use crate::middleware::auth::Token;
 use crate::utils::jwt_util::JWTToken;
 use crate::common::error_handler::ErrorResponder;
 use crate::common::result::BaseResponse;
+use crate::model::system::{sys_menu, sys_user, sys_user_role};
 use crate::vo::system::user_vo::*;
 
 // 后台用户登录
