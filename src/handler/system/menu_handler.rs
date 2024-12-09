@@ -1,15 +1,13 @@
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use diesel::associations::HasTable;
 use rocket::serde::json::{Json, Value};
-use rocket::serde::json::serde_json::json;
-
+use crate::common::result::BaseResponse;
 use crate::model::menu::{SysMenu, SysMenuAdd, SysMenuUpdate};
 use crate::RB;
 use crate::schema::sys_menu::{id, parent_id, sort, status_id};
 use crate::schema::sys_menu::dsl::sys_menu;
 use crate::middleware::auth::Token;
-use crate::vo::{err_result_msg, handle_result, ok_result_page};
-use crate::vo::menu_vo::{*};
+use crate::vo::system::menu_vo::{*};
 
 // 查询菜单
 #[post("/menu_list", data = "<item>")]
@@ -43,11 +41,11 @@ pub async fn menu_list(item: Json<MenuListReq>, _auth: Token) -> Value {
                     })
                 }
             }
-            json!(ok_result_page(menu_list, 0))
+            BaseResponse::ok_result_page(menu_list, 0)
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -73,11 +71,15 @@ pub async fn menu_save(item: Json<MenuSaveReq>, _auth: Token) -> Value {
 
     match &mut RB.clone().get() {
         Ok(conn) => {
-            json!(handle_result(diesel::insert_into(sys_menu::table()).values(menu_add).execute(conn)))
+            let result = diesel::insert_into(sys_menu::table()).values(menu_add).execute(conn);
+            match result {
+                Ok(_u) => BaseResponse::<String>::ok_result(),
+                Err(err) => BaseResponse::<String>::err_result_msg(err.to_string()),
+            }
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -103,11 +105,15 @@ pub async fn menu_update(item: Json<MenuUpdateReq>, _auth: Token) -> Value {
 
     match &mut RB.clone().get() {
         Ok(conn) => {
-            json!(handle_result(diesel::update(sys_menu).filter(id.eq(&menu.id)).set(s_menu).execute(conn)))
+            let result = diesel::update(sys_menu).filter(id.eq(&menu.id)).set(s_menu).execute(conn);
+            match result {
+                Ok(_u) => BaseResponse::<String>::ok_result(),
+                Err(err) => BaseResponse::<String>::err_result_msg(err.to_string()),
+            }
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -123,19 +129,23 @@ pub async fn menu_delete(item: Json<MenuDeleteReq>, _auth: Token) -> Value {
                 Ok(count) => {
                     if count > 0 {
                         error!("err:{}", "有下级菜单,不能直接删除".to_string());
-                        return json!(err_result_msg("有下级菜单,不能直接删除".to_string()));
+                        return  BaseResponse::<String>::err_result_msg("有下级菜单,不能直接删除".to_string());
                     }
-                    json!(handle_result(diesel::delete(sys_menu.filter(id.eq(item.id.clone()))).execute(conn)))
+                    let result = diesel::delete(sys_menu.filter(id.eq(item.id.clone()))).execute(conn);
+                    match result {
+                        Ok(_u) => BaseResponse::<String>::ok_result(),
+                        Err(err) => BaseResponse::<String>::err_result_msg(err.to_string()),
+                    }
                 }
                 Err(err) => {
                     error!("err:{}", err.to_string());
-                    json!(err_result_msg(err.to_string()))
+                    BaseResponse::<String>::err_result_msg(err.to_string())
                 }
             }
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }

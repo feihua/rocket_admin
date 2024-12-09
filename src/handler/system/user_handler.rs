@@ -2,9 +2,10 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, sql_query};
 use diesel::associations::HasTable;
 use diesel::sql_types::Bigint;
 use rocket::serde::json::{Json, Value};
-use rocket::serde::json::serde_json::json;
 
 use crate::{RB, schema};
+use crate::common::error::WhoUnfollowedError;
+use crate::common::result::BaseResponse;
 use crate::model::menu::{StringColumn, SysMenu};
 use crate::model::role::SysRole;
 use crate::model::user::{SysUser, SysUserAdd, SysUserUpdate};
@@ -17,10 +18,8 @@ use crate::schema::sys_user::dsl::sys_user;
 use crate::schema::sys_user_role::{role_id, user_id};
 use crate::schema::sys_user_role::dsl::sys_user_role;
 use crate::middleware::auth::Token;
-use crate::utils::error::WhoUnfollowedError;
 use crate::utils::jwt_util::JWTToken;
-use crate::vo::{err_result_msg, handle_result, ok_result, ok_result_data, ok_result_page};
-use crate::vo::user_vo::*;
+use crate::vo::system::user_vo::*;
 
 // 后台用户登录
 #[post("/login", data = "<item>")]
@@ -36,18 +35,18 @@ pub async fn login(item: Json<UserLoginReq>) -> Value {
                 info!("select_by_mobile: {:?}", user);
 
                 if user.password.ne(&item.password) {
-                    return json!(err_result_msg("密码不正确".to_string()));
+                    return BaseResponse::<String>::err_result_msg("密码不正确".to_string());
                 }
 
                 let btn_menu = query_btn_menu(user.id);
 
                 if btn_menu.len() == 0 {
-                    return json!(err_result_msg("用户没有分配角色或者菜单,不能登录".to_string()));
+                    return BaseResponse::<String>::err_result_msg("用户没有分配角色或者菜单,不能登录".to_string());
                 }
 
                 match JWTToken::new(user.id, &user.user_name, btn_menu).create_token("123") {
                     Ok(token) => {
-                        json!(ok_result_data(token))
+                        BaseResponse::ok_result_data(token)
                     }
                     Err(err) => {
                         let er = match err {
@@ -56,17 +55,17 @@ pub async fn login(item: Json<UserLoginReq>) -> Value {
                         };
 
                         error!("err:{}", er.to_string());
-                        json!(err_result_msg(er))
+                        BaseResponse::<String>::err_result_msg(er)
                     }
                 }
             } else {
                 error!("err:{}", "根据手机号查询用户异常".to_string());
-                json!(err_result_msg("根据手机号查询用户异常".to_string()))
+                BaseResponse::<String>::err_result_msg("根据手机号查询用户异常".to_string())
             }
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -148,14 +147,14 @@ pub async fn query_user_role(item: Json<QueryUserRoleReq>, _auth: Token) -> Valu
                 }
             }
 
-            json!(ok_result_data(QueryUserRoleData {
+            BaseResponse::ok_result_data(QueryUserRoleData {
                 sys_role_list,
                 user_role_ids,
-            }))
+            })
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -169,7 +168,7 @@ pub async fn update_user_role(item: Json<UpdateUserRoleReq>, _auth: Token) -> Va
     let role_ids = user_role.role_ids;
 
     if u_id == 1 {
-        return json!(err_result_msg("不能修改超级管理员的角色".to_string()));
+        return BaseResponse::<String>::err_result_msg("不能修改超级管理员的角色".to_string());
     }
 
     match &mut RB.clone().get() {
@@ -185,17 +184,21 @@ pub async fn update_user_role(item: Json<UpdateUserRoleReq>, _auth: Token) -> Va
                             user_id: u_id.clone(),
                         })
                     }
-                    json!(handle_result(diesel::insert_into(sys_user_role::table()).values(&sys_role_user_list).execute(conn)))
+                    let result = diesel::insert_into(sys_user_role::table()).values(&sys_role_user_list).execute(conn);
+                    match result {
+                        Ok(_u) => BaseResponse::<String>::ok_result(),
+                        Err(err) => BaseResponse::<String>::err_result_msg(err.to_string()),
+                    }
                 }
                 Err(err) => {
                     error!("err:{}", err.to_string());
-                    json!(err_result_msg(err.to_string()))
+                    BaseResponse::<String>::err_result_msg(err.to_string())
                 }
             }
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -218,7 +221,7 @@ pub async fn query_user_menu(auth: Token) -> Value {
                                 }
                                 Err(err) => {
                                     error!("err:{}", err.to_string());
-                                    return json!(err_result_msg(err.to_string()));
+                                    return BaseResponse::<String>::err_result_msg(err.to_string());
                                 }
                             }
                         }
@@ -231,7 +234,7 @@ pub async fn query_user_menu(auth: Token) -> Value {
                                 }
                                 Err(err) => {
                                     error!("err:{}", err.to_string());
-                                    return json!(err_result_msg(err.to_string()));
+                                    return BaseResponse::<String>::err_result_msg(err.to_string());
                                 }
                             }
                         }
@@ -269,29 +272,29 @@ pub async fn query_user_menu(auth: Token) -> Value {
                                     btn_menu.push(x.api_url);
                                 }
                             }
-                            json!(ok_result_data(QueryUserMenuData {
+                            BaseResponse::ok_result_data(QueryUserMenuData {
                                 sys_menu: sys_user_menu_list,
                                 btn_menu,
                                 avatar: "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png".to_string(),
                                 name: user.user_name,
-                            }))
+                            })
                         }
                         Err(err) => {
                             error!("err:{}", err.to_string());
-                            return json!(err_result_msg(err.to_string()));
+                            return BaseResponse::<String>::err_result_msg(err.to_string());
                         }
                     }
                 }
 
                 Err(err) => {
                     error!("err:{}", err.to_string());
-                    json!(err_result_msg(err.to_string()))
+                    BaseResponse::<String>::err_result_msg(err.to_string())
                 }
             };
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -327,11 +330,11 @@ pub async fn user_list(item: Json<UserListReq>, _auth: Token) -> Value {
                     })
                 }
             }
-            json!(ok_result_page(list_data, 10))
+            BaseResponse::ok_result_page(list_data, 10)
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -352,7 +355,21 @@ pub async fn user_save(item: Json<UserSaveReq>, _auth: Token) -> Value {
         password: "123456".to_string(),//默认密码为123456,暂时不加密
     };
 
-    json!(SysUser::add_user(s_user))
+    match &mut RB.clone().get() {
+        Ok(conn) => {
+            let query = diesel::insert_into(sys_user::table()).values(s_user);
+            debug!("SQL:{}", diesel::debug_query::<diesel::mysql::Mysql, _>(&query).to_string());
+            let result = query.execute(conn);
+            match result {
+                Ok(_u) => BaseResponse::<String>::ok_result(),
+                Err(err) => BaseResponse::<String>::err_result_msg(err.to_string()),
+            }
+        }
+        Err(err) => {
+            error!("err:{}", err.to_string());
+            BaseResponse::<String>::err_result_msg(err.to_string())
+        }
+    }
 }
 
 // 更新用户信息
@@ -380,17 +397,21 @@ pub async fn user_update(item: Json<UserUpdateReq>, _auth: Token) -> Value {
 
                     let query = diesel::update(sys_user.filter(id.eq(user.id.clone()))).set(s_user);
                     debug!("SQL:{}", diesel::debug_query::<diesel::mysql::Mysql, _>(&query).to_string());
-                    json!(handle_result(query.execute(conn)))
+                    let result = query.execute(conn);
+                    match result {
+                        Ok(_u) => BaseResponse::<String>::ok_result(),
+                        Err(err) => BaseResponse::<String>::err_result_msg(err.to_string()),
+                    }
                 }
                 Err(err) => {
                     error!("err:{}", err.to_string());
-                    json!(err_result_msg(err.to_string()))
+                    BaseResponse::<String>::err_result_msg(err.to_string())
                 }
             }
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -415,16 +436,20 @@ pub async fn user_delete(item: Json<UserDeleteReq>, _auth: Token) -> Value {
             }
 
             if delete_ids.len() == 0 {
-                return json!(ok_result());
+                return BaseResponse::<String>::ok_result();
             }
 
             let query = diesel::delete(sys_user.filter(id.eq_any(delete_ids)));
             debug!("SQL: {}", diesel::debug_query::<diesel::mysql::Mysql, _>(&query).to_string());
-            json!(handle_result(query.execute(conn)))
+            let result = query.execute(conn);
+            match result {
+                Ok(_u) => BaseResponse::<String>::ok_result(),
+                Err(err) => BaseResponse::<String>::err_result_msg(err.to_string()),
+            }
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
@@ -442,19 +467,23 @@ pub async fn update_user_password(item: Json<UpdateUserPwdReq>, _auth: Token) ->
                 Ok(user) => {
                     if user.password != user_pwd.pwd {
                         error!("err:{}", "旧密码不正确".to_string());
-                        return json!(err_result_msg("旧密码不正确".to_string()));
+                        return BaseResponse::<String>::err_result_msg("旧密码不正确".to_string());
                     }
-                    json!(handle_result(diesel::update(sys_user.filter(id.eq(user_pwd.id.clone()))).set(password.eq(&user_pwd.re_pwd)).execute(conn)))
+                    let result = diesel::update(sys_user.filter(id.eq(user_pwd.id.clone()))).set(password.eq(&user_pwd.re_pwd)).execute(conn);
+                    match result {
+                        Ok(_u) => BaseResponse::<String>::ok_result(),
+                        Err(err) => BaseResponse::<String>::err_result_msg(err.to_string()),
+                    }
                 }
                 Err(err) => {
                     error!("err:{}", err.to_string());
-                    json!(err_result_msg(err.to_string()))
+                    BaseResponse::<String>::err_result_msg(err.to_string())
                 }
             }
         }
         Err(err) => {
             error!("err:{}", err.to_string());
-            json!(err_result_msg(err.to_string()))
+            BaseResponse::<String>::err_result_msg(err.to_string())
         }
     }
 }
