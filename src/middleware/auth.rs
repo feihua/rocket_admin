@@ -10,7 +10,6 @@ pub struct Token {
     pub username: String,
 }
 
-
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Token {
     type Error = ();
@@ -23,9 +22,14 @@ impl<'r> FromRequest<'r> for Token {
                 let token = split_vec[1];
                 let jwt_token_e = JWTToken::verify("123", &token);
                 let jwt_token = match jwt_token_e {
-                    Ok(data) => { data }
+                    Ok(data) => data,
                     Err(err) => {
-                        log::error!("check token fail path: {}, token: {}, err: {}", path, token, err.to_string());
+                        log::error!(
+                            "check token fail path: {}, token: {}, err: {}",
+                            path,
+                            token,
+                            err.to_string()
+                        );
                         return Outcome::Error((Status::Unauthorized, ()));
                     }
                 };
@@ -38,9 +42,17 @@ impl<'r> FromRequest<'r> for Token {
                     }
                 }
                 return if flag {
-                    Outcome::Success(Token { id: jwt_token.id, username: jwt_token.username })
+                    Outcome::Success(Token {
+                        id: jwt_token.id,
+                        username: jwt_token.username,
+                    })
                 } else {
-                    log::error!("{} has no permissions request path: {}, token: {}", &jwt_token.username, path, token);
+                    log::error!(
+                        "{} has no permissions request path: {}, token: {}",
+                        &jwt_token.username,
+                        path,
+                        token
+                    );
                     Outcome::Error((Status::Forbidden, ()))
                 };
             }
@@ -50,4 +62,3 @@ impl<'r> FromRequest<'r> for Token {
         Outcome::Error((Status::Unauthorized, ()))
     }
 }
-

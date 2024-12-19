@@ -60,6 +60,13 @@ where
             data: Some(data),
         })
     }
+    pub fn err_result_data(data: T, msg: String) -> Value {
+        json!(BaseResponse {
+            msg,
+            code: 1,
+            data: Some(data),
+        })
+    }
 
     pub fn err_result_msg(msg: String) -> Value {
         json!(BaseResponse {

@@ -1,9 +1,11 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use jsonwebtoken::{Algorithm, decode, DecodingKey, encode, EncodingKey, errors::ErrorKind, Header, Validation};
-use serde::{Deserialize, Serialize};
 use crate::common::error::WhoUnfollowedError;
 use crate::common::error::WhoUnfollowedError::JwtTokenError;
+use jsonwebtoken::{
+    decode, encode, errors::ErrorKind, Algorithm, DecodingKey, EncodingKey, Header, Validation,
+};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct JWTToken {
@@ -37,11 +39,11 @@ impl JWTToken {
             permissions,
             aud: String::from("rust_admin"), // (audience)：受众
             exp: (now + m30).as_secs() as usize,
-            iat: now.as_secs() as usize,  // (Issued At)：签发时间
-            iss: String::from("koobe"),     // (issuer)：签发人
-            nbf: now.as_secs() as usize,  // (Not Before)：生效时间
+            iat: now.as_secs() as usize,     // (Issued At)：签发时间
+            iss: String::from("koobe"),      // (issuer)：签发人
+            nbf: now.as_secs() as usize,     // (Not Before)：生效时间
             sub: String::from("rust_admin"), // (subject)：主题
-            jti: String::from("ignore"),  // (JWT ID)：编号
+            jti: String::from("ignore"),     // (JWT ID)：编号
         }
     }
 
@@ -74,7 +76,9 @@ impl JWTToken {
             Err(err) => match *err.kind() {
                 ErrorKind::InvalidToken => return Err(JwtTokenError("InvalidToken".to_string())),
                 ErrorKind::InvalidIssuer => return Err(JwtTokenError("InvalidIssuer".to_string())),
-                ErrorKind::ExpiredSignature => return Err(JwtTokenError("token 已经超时了".to_string())),
+                ErrorKind::ExpiredSignature => {
+                    return Err(JwtTokenError("token 已经超时了".to_string()))
+                }
                 // _ => return Err(Error::from("InvalidToken other errors")),
                 _ => Err(JwtTokenError("create token error".to_string())),
             },
@@ -90,9 +94,8 @@ mod tests {
     fn test_jwt() {
         let jwt = JWTToken::new(1, "koobe", vec![]);
         let res = jwt.create_token("123").unwrap_or_default();
-        println!("{:?}",res);
+        println!("{:?}", res);
         let token = JWTToken::verify("123", &res);
-        println!("{:?}",token)
-
+        println!("{:?}", token)
     }
 }
