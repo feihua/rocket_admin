@@ -61,6 +61,14 @@ where
         })
     }
 
+    pub fn err_result_data(data: T, msg: String) -> Value {
+        json!(BaseResponse {
+            msg,
+            code: 1,
+            data: Some(data),
+        })
+    }
+
     pub fn err_result_msg(msg: String) -> Value {
         json!(BaseResponse {
             msg: msg.to_string(),
@@ -84,6 +92,16 @@ where
             success: true,
             data: Some(data),
             total,
+        })
+    }
+
+    pub fn err_result_page(data: T, msg: String) -> Value {
+        json!(ResponsePage {
+            msg,
+            code: 1,
+            success: true,
+            data: Some(data),
+            total: 0,
         })
     }
 }
