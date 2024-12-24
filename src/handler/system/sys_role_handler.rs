@@ -21,7 +21,7 @@ use crate::{schema, RB};
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/add_sys_role", data = "<req>")]
+#[post("/system/role/addRole", data = "<req>")]
 pub async fn add_sys_role(req: Json<AddRoleReq>, _auth: Token) -> Value {
     log::info!("add sys_role params: {:?}", &req);
 
@@ -58,7 +58,7 @@ pub async fn add_sys_role(req: Json<AddRoleReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/delete_sys_role", data = "<item>")]
+#[post("/system/role/deleteRole", data = "<item>")]
 pub async fn delete_sys_role(item: Json<DeleteRoleReq>, _auth: Token) -> Value {
     log::info!("delete sys_role params: {:?}", &item);
     match &mut RB.clone().get() {
@@ -102,7 +102,7 @@ pub async fn delete_sys_role(item: Json<DeleteRoleReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_sys_role", data = "<req>")]
+#[post("/system/role/updateRole", data = "<req>")]
 pub async fn update_sys_role(req: Json<UpdateRoleReq>, _auth: Token) -> Value {
     log::info!("update sys_role params: {:?}", &req);
 
@@ -141,7 +141,7 @@ pub async fn update_sys_role(req: Json<UpdateRoleReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_sys_role_status", data = "<item>")]
+#[post("/system/role/updateRoleStatus", data = "<item>")]
 pub async fn update_sys_role_status(item: Json<UpdateRoleStatusReq>, _auth: Token) -> Value {
     log::info!("update sys_role_status params: {:?}", &item);
 
@@ -168,7 +168,7 @@ pub async fn update_sys_role_status(item: Json<UpdateRoleStatusReq>, _auth: Toke
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/query_sys_role_detail", data = "<item>")]
+#[post("/system/role/queryRoleDetail", data = "<item>")]
 pub async fn query_sys_role_detail(item: Json<QueryRoleDetailReq>, _auth: Token) -> Value {
     log::info!("query sys_role_detail params: {:?}", &item);
 
@@ -213,7 +213,7 @@ pub async fn query_sys_role_detail(item: Json<QueryRoleDetailReq>, _auth: Token)
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/query_sys_role_list", data = "<item>")]
+#[post("/system/role/queryRoleList", data = "<item>")]
 pub async fn query_sys_role_list(item: Json<QueryRoleListReq>, _auth: Token) -> Value {
     log::info!("query sys_role_list params: {:?}", &item);
 
@@ -262,7 +262,7 @@ pub async fn query_sys_role_list(item: Json<QueryRoleListReq>, _auth: Token) -> 
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/query_role_menu", data = "<item>")]
+#[post("/system/role/queryRoleMenu", data = "<item>")]
 pub async fn query_role_menu(item: Json<QueryRoleMenuReq>, _auth: Token) -> Value {
     log::info!("query_role_menu params: {:?}", &item);
     match &mut RB.clone().get() {
@@ -324,7 +324,7 @@ pub async fn query_role_menu(item: Json<QueryRoleMenuReq>, _auth: Token) -> Valu
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_role_menu", data = "<item>")]
+#[post("/system/role/updateRoleMenu", data = "<item>")]
 pub async fn update_role_menu(item: Json<UpdateRoleMenuReq>, _auth: Token) -> Value {
     log::info!("update_role_menu params: {:?}", &item);
     let r_id = item.role_id.clone();

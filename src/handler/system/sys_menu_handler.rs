@@ -16,7 +16,7 @@ use crate::RB;
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/add_sys_menu", data = "<req>")]
+#[post("/system/menu/addMenu", data = "<req>")]
 pub async fn add_sys_menu(req: Json<AddMenuReq>, _auth: Token) -> Value {
     log::info!("add sys_menu params: {:?}", &req);
 
@@ -25,7 +25,7 @@ pub async fn add_sys_menu(req: Json<AddMenuReq>, _auth: Token) -> Value {
     let add_sys_menu_param = AddSysMenu {
         menu_name: item.menu_name,       //菜单名称
         menu_type: item.menu_type,       //菜单类型(1：目录   2：菜单   3：按钮)
-        status_id: item.status_id,       //状态(1:正常，0:禁用)
+        status: item.status,       //状态(1:正常，0:禁用)
         sort: item.sort,                 //排序
         parent_id: item.parent_id,       //父ID
         menu_url: item.menu_url,         //路由路径
@@ -58,7 +58,7 @@ pub async fn add_sys_menu(req: Json<AddMenuReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/delete_sys_menu", data = "<item>")]
+#[post("/system/menu/deleteMmenu", data = "<item>")]
 pub async fn delete_sys_menu(item: Json<DeleteMenuReq>, _auth: Token) -> Value {
     log::info!("delete sys_menu params: {:?}", &item);
     match &mut RB.clone().get() {
@@ -100,7 +100,7 @@ pub async fn delete_sys_menu(item: Json<DeleteMenuReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_sys_menu", data = "<req>")]
+#[post("/system/menu/updateMmenu", data = "<req>")]
 pub async fn update_sys_menu(req: Json<UpdateMenuReq>, _auth: Token) -> Value {
     log::info!("update sys_menu params: {:?}", &req);
 
@@ -110,7 +110,7 @@ pub async fn update_sys_menu(req: Json<UpdateMenuReq>, _auth: Token) -> Value {
         id: item.id,                     //主键
         menu_name: item.menu_name,       //菜单名称
         menu_type: item.menu_type,       //菜单类型(1：目录   2：菜单   3：按钮)
-        status_id: item.status_id,       //状态(1:正常，0:禁用)
+        status: item.status,       //状态(1:正常，0:禁用)
         sort: item.sort,                 //排序
         parent_id: item.parent_id,       //父ID
         menu_url: item.menu_url,         //路由路径
@@ -144,7 +144,7 @@ pub async fn update_sys_menu(req: Json<UpdateMenuReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_sys_menu_status", data = "<item>")]
+#[post("/system/menu/updateMenuStatus", data = "<item>")]
 pub async fn update_sys_menu_status(item: Json<UpdateMenuStatusReq>, _auth: Token) -> Value {
     log::info!("update sys_menu_status params: {:?}", &item);
 
@@ -152,7 +152,7 @@ pub async fn update_sys_menu_status(item: Json<UpdateMenuStatusReq>, _auth: Toke
         Ok(conn) => {
             let result = diesel::update(sys_menu)
                 .filter(id.eq_any(&item.ids))
-                .set(status_id.eq(item.status))
+                .set(status.eq(item.status))
                 .execute(conn);
             match result {
                 Ok(_u) => BaseResponse::<String>::ok_result(),
@@ -171,7 +171,7 @@ pub async fn update_sys_menu_status(item: Json<UpdateMenuStatusReq>, _auth: Toke
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/query_sys_menu_detail", data = "<item>")]
+#[post("/system/menu/queryMenuDetail", data = "<item>")]
 pub async fn query_sys_menu_detail(item: Json<QueryMenuDetailReq>, _auth: Token) -> Value {
     log::info!("query sys_menu_detail params: {:?}", &item);
 
@@ -187,7 +187,7 @@ pub async fn query_sys_menu_detail(item: Json<QueryMenuDetailReq>, _auth: Token)
                         id: x.id,                               //主键
                         menu_name: x.menu_name,                 //菜单名称
                         menu_type: x.menu_type, //菜单类型(1：目录   2：菜单   3：按钮)
-                        status_id: x.status_id, //状态(1:正常，0:禁用)
+                        status: x.status, //状态(1:正常，0:禁用)
                         sort: x.sort,           //排序
                         parent_id: x.parent_id, //父ID
                         menu_url: x.menu_url,   //路由路径
@@ -221,7 +221,7 @@ pub async fn query_sys_menu_detail(item: Json<QueryMenuDetailReq>, _auth: Token)
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/query_sys_menu_list", data = "<item>")]
+#[post("/system/menu/queryMenuList", data = "<item>")]
 pub async fn query_sys_menu_list(item: Json<QueryMenuListReq>, _auth: Token) -> Value {
     log::info!("query sys_menu_list params: {:?}", &item);
 
@@ -243,7 +243,7 @@ pub async fn query_sys_menu_list(item: Json<QueryMenuListReq>, _auth: Token) -> 
                         id: x.id,                               //主键
                         menu_name: x.menu_name,                 //菜单名称
                         menu_type: x.menu_type, //菜单类型(1：目录   2：菜单   3：按钮)
-                        status_id: x.status_id, //状态(1:正常，0:禁用)
+                        status: x.status, //状态(1:正常，0:禁用)
                         sort: x.sort,           //排序
                         parent_id: x.parent_id, //父ID
                         menu_url: x.menu_url,   //路由路径

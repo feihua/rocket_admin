@@ -25,7 +25,7 @@ use crate::{schema, RB};
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/add_sys_user", data = "<req>")]
+#[post("/system/user/addUser", data = "<req>")]
 pub async fn add_sys_user(req: Json<AddUserReq>, _auth: Token) -> Value {
     log::info!("add sys_user params: {:?}", &req);
 
@@ -64,7 +64,7 @@ pub async fn add_sys_user(req: Json<AddUserReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/delete_sys_user", data = "<item>")]
+#[post("/system/user/deleteUser", data = "<item>")]
 pub async fn delete_sys_user(item: Json<DeleteUserReq>, _auth: Token) -> Value {
     log::info!("delete sys_user params: {:?}", &item);
     match &mut RB.clone().get() {
@@ -107,7 +107,7 @@ pub async fn delete_sys_user(item: Json<DeleteUserReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_sys_user", data = "<req>")]
+#[post("/system/user/updateUser", data = "<req>")]
 pub async fn update_sys_user(req: Json<UpdateUserReq>, _auth: Token) -> Value {
     log::info!("update sys_user params: {:?}", &req);
 
@@ -164,7 +164,7 @@ pub async fn update_sys_user(req: Json<UpdateUserReq>, _auth: Token) -> Value {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_sys_user_status", data = "<item>")]
+#[post("/system/user/updateUserStatus", data = "<item>")]
 pub async fn update_sys_user_status(item: Json<UpdateUserStatusReq>, _auth: Token) -> Value {
     log::info!("update sys_user_status params: {:?}", &item);
 
@@ -191,7 +191,7 @@ pub async fn update_sys_user_status(item: Json<UpdateUserStatusReq>, _auth: Toke
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_user_password", data = "<item>")]
+#[post("/system/user/updateUserPassword", data = "<item>")]
 pub async fn update_user_password(item: Json<UpdateUserPwdReq>, _auth: Token) -> Value {
     log::info!("update_user_pwd params: {:?}", &item);
     let user_pwd = item.0;
@@ -234,7 +234,7 @@ pub async fn update_user_password(item: Json<UpdateUserPwdReq>, _auth: Token) ->
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/query_sys_user_detail", data = "<item>")]
+#[post("/system/user/queryUserDetail", data = "<item>")]
 pub async fn query_sys_user_detail(item: Json<QueryUserDetailReq>, _auth: Token) -> Value {
     log::info!("query sys_user_detail params: {:?}", &item);
 
@@ -280,7 +280,7 @@ pub async fn query_sys_user_detail(item: Json<QueryUserDetailReq>, _auth: Token)
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/query_sys_user_list", data = "<item>")]
+#[post("/system/user/queryUserList", data = "<item>")]
 pub async fn query_sys_user_list(item: Json<QueryUserListReq>, _auth: Token) -> Value {
     log::info!("query sys_user_list params: {:?}", &item);
 
@@ -333,7 +333,7 @@ pub async fn query_sys_user_list(item: Json<QueryUserListReq>, _auth: Token) -> 
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/login", data = "<item>")]
+#[post("/system/user/login", data = "<item>")]
 pub async fn login(item: Json<UserLoginReq>) -> Value {
     log::info!("user login params: {:?}", &item);
 
@@ -443,7 +443,7 @@ fn query_btn_menu(u_id: i64) -> Vec<String> {
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/query_user_role", data = "<item>")]
+#[post("/system/user/queryUserRole", data = "<item>")]
 pub async fn query_user_role(item: Json<QueryUserRoleReq>, _auth: Token) -> Value {
     log::info!("query_user_role params: {:?}", item);
     match &mut RB.clone().get() {
@@ -492,7 +492,7 @@ pub async fn query_user_role(item: Json<QueryUserRoleReq>, _auth: Token) -> Valu
  *author：刘飞华
  *date：2024/12/20 14:55:54
  */
-#[post("/update_user_role", data = "<item>")]
+#[post("/system/user/updateUserRole", data = "<item>")]
 pub async fn update_user_role(item: Json<UpdateUserRoleReq>, _auth: Token) -> Value {
     log::info!("update_user_role params: {:?}", item);
     let user_role = item.0;
@@ -534,7 +534,7 @@ pub async fn update_user_role(item: Json<UpdateUserRoleReq>, _auth: Token) -> Va
     }
 }
 
-#[get("/query_user_menu")]
+#[get("/system/user/queryUserMenu")]
 pub async fn query_user_menu(auth: Token) -> Value {
     log::info!("query_user_menu params: {:?}", auth);
 
@@ -592,7 +592,7 @@ pub async fn query_user_menu(auth: Token) -> Value {
 
                     match sys_menu
                         .filter(schema::sys_menu::id.eq_any(sys_menu_ids))
-                        .filter(schema::sys_menu::status_id.eq(1))
+                        .filter(schema::sys_menu::status.eq(1))
                         .order(crate::schema::sys_menu::sort.asc())
                         .distinct()
                         .load::<SysMenu>(conn)
