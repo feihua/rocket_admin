@@ -26,7 +26,7 @@ use sea_orm::prelude::Expr;
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/addUser", data = "<item>")]
+#[post("/system/user/addUser", data = "<item>")]
 pub async fn add_sys_user(
     db: &State<DatabaseConnection>,
     item: Json<AddUserReq>,
@@ -62,7 +62,7 @@ pub async fn add_sys_user(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/deleteUser", data = "<item>")]
+#[post("/system/user/deleteUser", data = "<item>")]
 pub async fn delete_sys_user(
     db: &State<DatabaseConnection>,
     item: Json<DeleteUserReq>,
@@ -88,7 +88,7 @@ pub async fn delete_sys_user(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/updateUser", data = "<item>")]
+#[post("/system/user/updateUser", data = "<item>")]
 pub async fn update_sys_user(
     db: &State<DatabaseConnection>,
     item: Json<UpdateUserReq>,
@@ -128,7 +128,7 @@ pub async fn update_sys_user(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/updateUserStatus", data = "<item>")]
+#[post("/system/user/updateUserStatus", data = "<item>")]
 pub async fn update_sys_user_status(
     db: &State<DatabaseConnection>,
     item: Json<UpdateUserStatusReq>,
@@ -154,7 +154,7 @@ pub async fn update_sys_user_status(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/update_user_password", data = "<item>")]
+#[post("/system/user/update_user_password", data = "<item>")]
 pub async fn update_user_password(
     db: &State<DatabaseConnection>,
     item: Json<UpdateUserPwdReq>,
@@ -190,7 +190,7 @@ pub async fn update_user_password(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/queryUserDetail", data = "<item>")]
+#[post("/system/user/queryUserDetail", data = "<item>")]
 pub async fn query_sys_user_detail(
     db: &State<DatabaseConnection>,
     item: Json<QueryUserDetailReq>,
@@ -229,7 +229,7 @@ pub async fn query_sys_user_detail(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/queryUserList", data = "<item>")]
+#[post("/system/user/queryUserList", data = "<item>")]
 pub async fn query_sys_user_list(
     db: &State<DatabaseConnection>,
     item: Json<QueryUserListReq>,
@@ -280,7 +280,7 @@ pub async fn query_sys_user_list(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/login", data = "<item>")]
+#[post("/system/user/login", data = "<item>")]
 pub async fn login(
     db: &State<DatabaseConnection>,
     item: Json<UserLoginReq>,
@@ -377,7 +377,7 @@ async fn query_btn_menu(db: &DatabaseConnection, id: i64) -> Result<Vec<String>,
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/query_user_role", data = "<item>")]
+#[post("/system/user/queryUserRole", data = "<item>")]
 pub async fn query_user_role(
     db: &State<DatabaseConnection>,
     item: Json<QueryUserRoleReq>,
@@ -423,7 +423,7 @@ pub async fn query_user_role(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/update_user_role", data = "<item>")]
+#[post("/system/user/updateUserRole", data = "<item>")]
 pub async fn update_user_role(
     db: &State<DatabaseConnection>,
     item: Json<UpdateUserRoleReq>,
@@ -472,7 +472,7 @@ pub async fn update_user_role(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[get("/query_user_menu")]
+#[get("/system/user/queryUserMenu")]
 pub async fn query_user_menu(
     db: &State<DatabaseConnection>,
     auth: Token,
@@ -526,7 +526,7 @@ pub async fn query_user_menu(
     let mut sys_menu: HashSet<MenuList> = HashSet::new();
     for y in SysMenu::find()
         .filter(sys_menu::Column::Id.is_in(sys_menu_ids))
-        .filter(sys_menu::Column::StatusId.eq(1))
+        .filter(sys_menu::Column::Status.eq(1))
         .order_by_asc(sys_menu::Column::Sort)
         .all(db)
         .await?

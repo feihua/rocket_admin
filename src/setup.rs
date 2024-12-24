@@ -1,7 +1,7 @@
 use sea_orm::*;
 
 // Replace with your database URL and database name
-const DATABASE_URL: &str = "mysql://root:oMbPi5munxCsBSsiLoPV@110.41.179.89:3306/axum";
+const DATABASE_URL: &str = "mysql://root:123456@127.0.0.1:3306/rustdb";
 // const DB_NAME: &str = "rustdb";
 
 pub(super) async fn set_up_db() -> Result<DatabaseConnection, DbErr> {

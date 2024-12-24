@@ -22,7 +22,7 @@ use sea_orm::prelude::Expr;
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/addMenu", data = "<item>")]
+#[post("/system/menu/addMenu", data = "<item>")]
 pub async fn add_sys_menu(
     db: &State<DatabaseConnection>,
     item: Json<AddMenuReq>,
@@ -37,7 +37,7 @@ pub async fn add_sys_menu(
         id: NotSet,                    //主键
         menu_name: Set(req.menu_name), //菜单名称
         menu_type: Set(req.menu_type), //菜单类型(1：目录   2：菜单   3：按钮)
-        status_id: Set(req.status_id), //状态(1:正常，0:禁用)
+        status: Set(req.status), //状态(1:正常，0:禁用)
         sort: Set(req.sort),           //排序
         parent_id: Set(req.parent_id), //父ID
         menu_url: Set(req.menu_url),   //路由路径
@@ -61,7 +61,7 @@ pub async fn add_sys_menu(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/deleteMenu", data = "<item>")]
+#[post("/system/menu/deleteMenu", data = "<item>")]
 pub async fn delete_sys_menu(
     db: &State<DatabaseConnection>,
     item: Json<DeleteMenuReq>,
@@ -104,7 +104,7 @@ pub async fn delete_sys_menu(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/updateMenu", data = "<item>")]
+#[post("/system/menu/updateMenu", data = "<item>")]
 pub async fn update_sys_menu(
     db: &State<DatabaseConnection>,
     item: Json<UpdateMenuReq>,
@@ -124,7 +124,7 @@ pub async fn update_sys_menu(
         id: Set(req.id),               //主键
         menu_name: Set(req.menu_name), //菜单名称
         menu_type: Set(req.menu_type), //菜单类型(1：目录   2：菜单   3：按钮)
-        status_id: Set(req.status_id), //状态(1:正常，0:禁用)
+        status: Set(req.status), //状态(1:正常，0:禁用)
         sort: Set(req.sort),           //排序
         parent_id: Set(req.parent_id), //父ID
         menu_url: Set(req.menu_url),   //路由路径
@@ -147,7 +147,7 @@ pub async fn update_sys_menu(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/updateMenuStatus", data = "<item>")]
+#[post("/system/menu/updateMenuStatus", data = "<item>")]
 pub async fn update_sys_menu_status(
     db: &State<DatabaseConnection>,
     item: Json<UpdateMenuStatusReq>,
@@ -158,7 +158,7 @@ pub async fn update_sys_menu_status(
     let req = item.0;
 
     let result = SysMenu::update_many()
-        .col_expr(sys_menu::Column::StatusId, Expr::value(req.status))
+        .col_expr(sys_menu::Column::Status, Expr::value(req.status))
         .filter(sys_menu::Column::Id.is_in(req.ids))
         .exec(db)
         .await;
@@ -173,7 +173,7 @@ pub async fn update_sys_menu_status(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/queryMenuDetail", data = "<item>")]
+#[post("/system/menu/queryMenuDetail", data = "<item>")]
 pub async fn query_sys_menu_detail(
     db: &State<DatabaseConnection>,
     item: Json<QueryMenuDetailReq>,
@@ -192,7 +192,7 @@ pub async fn query_sys_menu_detail(
                 id: x.id,                                   //主键
                 menu_name: x.menu_name,                     //菜单名称
                 menu_type: x.menu_type,                     //菜单类型(1：目录   2：菜单   3：按钮)
-                status_id: x.status_id,                     //状态(1:正常，0:禁用)
+                status: x.status,                     //状态(1:正常，0:禁用)
                 sort: x.sort,                               //排序
                 parent_id: x.parent_id,                     //父ID
                 menu_url: x.menu_url.unwrap_or_default(),   //路由路径
@@ -216,7 +216,7 @@ pub async fn query_sys_menu_detail(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/queryMenuList", data = "<item>")]
+#[post("/system/menu/queryMenuList", data = "<item>")]
 pub async fn query_sys_menu_list(
     db: &State<DatabaseConnection>,
     item: Json<QueryMenuListReq>,
@@ -236,7 +236,7 @@ pub async fn query_sys_menu_list(
             id: x.id,                                   //主键
             menu_name: x.menu_name,                     //菜单名称
             menu_type: x.menu_type,                     //菜单类型(1：目录   2：菜单   3：按钮)
-            status_id: x.status_id,                     //状态(1:正常，0:禁用)
+            status: x.status,                     //状态(1:正常，0:禁用)
             sort: x.sort,                               //排序
             parent_id: x.parent_id,                     //父ID
             menu_url: x.menu_url.unwrap_or_default(),   //路由路径

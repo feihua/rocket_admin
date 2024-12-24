@@ -22,7 +22,7 @@ use sea_orm::prelude::Expr;
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/addRole", data = "<item>")]
+#[post("/system/role/addRole", data = "<item>")]
 pub async fn add_sys_role(
     db: &State<DatabaseConnection>,
     item: Json<AddRoleReq>,
@@ -56,7 +56,7 @@ pub async fn add_sys_role(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/deleteRole", data = "<item>")]
+#[post("/system/role/deleteRole", data = "<item>")]
 pub async fn delete_sys_role(
     db: &State<DatabaseConnection>,
     item: Json<DeleteRoleReq>,
@@ -95,7 +95,7 @@ pub async fn delete_sys_role(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/updateRole", data = "<item>")]
+#[post("/system/role/updateRole", data = "<item>")]
 pub async fn update_sys_role(
     db: &State<DatabaseConnection>,
     item: Json<UpdateRoleReq>,
@@ -133,7 +133,7 @@ pub async fn update_sys_role(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/updateRoleStatus", data = "<item>")]
+#[post("/system/role/updateRoleStatus", data = "<item>")]
 pub async fn update_sys_role_status(
     db: &State<DatabaseConnection>,
     item: Json<UpdateRoleStatusReq>,
@@ -159,7 +159,7 @@ pub async fn update_sys_role_status(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/queryRoleDetail", data = "<item>")]
+#[post("/system/role/queryRoleDetail", data = "<item>")]
 pub async fn query_sys_role_detail(
     db: &State<DatabaseConnection>,
     item: Json<QueryRoleDetailReq>,
@@ -197,7 +197,7 @@ pub async fn query_sys_role_detail(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/queryRoleList", data = "<item>")]
+#[post("/system/role/queryRoleList", data = "<item>")]
 pub async fn query_sys_role_list(
     db: &State<DatabaseConnection>,
     item: Json<QueryRoleListReq>,
@@ -242,7 +242,7 @@ pub async fn query_sys_role_list(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/query_role_menu", data = "<item>")]
+#[post("/system/role/queryRoleMenu", data = "<item>")]
 pub async fn query_role_menu(
     db: &State<DatabaseConnection>,
     item: Json<QueryRoleMenuReq>,
@@ -291,7 +291,7 @@ pub async fn query_role_menu(
  *author：刘飞华
  *date：2024/12/19 10:36:44
  */
-#[post("/update_role_menu", data = "<item>")]
+#[post("/system/role/updateRoleMenu", data = "<item>")]
 pub async fn update_role_menu(
     db: &State<DatabaseConnection>,
     item: Json<UpdateRoleMenuReq>,
